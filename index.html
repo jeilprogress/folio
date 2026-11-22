@@ -40,7 +40,7 @@ header{background:transparent;border:0}.landing{max-width:900px;margin:clamp(48p
 .openStory{min-width:0;flex:1;text-align:left;padding:10px;border-radius:12px;overflow-wrap:anywhere}.storyGrip,.storyOptions{flex:none;min-width:38px;min-height:42px;color:var(--muted)}.storyGrip{touch-action:none;user-select:none;cursor:grab;font-size:20px}.storyGrip:active{cursor:grabbing}.storyTile.dragSource{opacity:.6}.dropBefore:before,.dropAfter:after{content:"";position:absolute;left:8px;right:8px;height:3px;border-radius:4px;background:var(--wine)}.dropBefore:before{top:-8px}.dropAfter:after{bottom:-8px}.storyActions{width:140px;padding:5px;border-radius:15px}.storyActions button{width:100%;text-align:left;padding:9px 12px}.storyGrip,.storyOptions{display:grid;place-items:center;padding:0;width:40px;height:42px}.storyGrip span{display:block;width:12px;height:18px;background:radial-gradient(circle,currentColor 1.6px,transparent 2px) 0 0/6px 6px}.storyOptions span{display:block;width:18px;height:6px;background:radial-gradient(circle,currentColor 1.6px,transparent 2px) 0 0/6px 6px}.danger{color:var(--wine)}
 </style></head><body>
 <div id="home"><header><div class="brand"><span class="mark" aria-hidden="true"></span>Folio</div><div class="flex"><button id="backups" class="glass">Backups</button><button id="theme" class="glass" aria-label="Switch theme">☾</button></div></header>
-<main class="landing"><div class="row"><h1>Your stories</h1><button id="create" class="create">＋ Create story</button></div><div id="shelf" class="shelfList"></div></main></div>
+<main class="landing"><div class="row"><h1 id="greeting">Hello, Jl.</h1><button id="create" class="create">＋ Create story</button></div><div id="shelf" class="shelfList"></div></main></div>
 <main id="room" class="writer" hidden><nav class="roomNav glass"><button popovertarget="drawer" aria-label="Open scenes and story navigation"><span class="hamb" aria-hidden="true"><i></i><i></i><i></i></span></button><button id="formatToggle" class="typeIcon" popovertarget="tools" aria-label="Text formatting">Aa</button><button id="roomTheme" aria-label="Switch theme">☾</button></nav>
 <aside id="drawer" popover><button id="homeBtn">← Story shelf</button><h2 id="currentStory"></h2><div class="row"><span class="label">Scenes</span><button id="addScene" aria-label="Add scene">＋</button></div><nav id="scenes" class="sceneList" aria-label="Scenes"></nav><button id="rename" class="quiet">Rename scene</button><p class="roomStats"><span id="saved"></span></p></aside>
 <div class="toolbar" id="tools" popover role="group" aria-label="Text formatting"><button data-cmd="bold" title="Bold (Ctrl/⌘ B)" aria-label="Bold"><b>B</b></button><button data-cmd="italic" title="Italic (Ctrl/⌘ I)" aria-label="Italic"><i>I</i></button><button data-cmd="underline" title="Underline" aria-label="Underline"><u>U</u></button><span class="sep"></span><span id="alignTools" class="flex" style="gap:0"></span><span class="sep"></span><button id="breakBtn" title="Insert a time skip" aria-label="Insert a time skip">⁂</button><select id="writingSize" class="sizeChoice" aria-label="Writing text size"><option>14</option><option>16</option><option>18</option><option selected>20</option><option>22</option><option>24</option><option>28</option><option>32</option></select><button id="copy" class="copy pill">Copy scene</button></div>
@@ -70,7 +70,16 @@ function openRoom(s){
  data.scene=(s.scenes.find(v=>v.id===s.lastScene)||s.scenes.find(v=>v.id===data.scene)||s.scenes[0]).id;
  $('home').hidden=true;$('room').hidden=false;render();save();ed.focus();
 }
+const manilaHour=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Manila',hour:'2-digit',hourCycle:'h23'});
+function updateGreeting(now=new Date()){
+ const hour=Number(manilaHour.format(now));
+ const period=hour>=5&&hour<12?'morning':hour>=12&&hour<18?'afternoon':'evening';
+ $('greeting').textContent='Good '+period+', Jl.';
+}
+setInterval(()=>{if(!document.hidden&&!$('home').hidden)updateGreeting()},1000*30);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateGreeting()});
 function goHome(){
+ updateGreeting();
  closePanels();$('room').hidden=true;$('home').hidden=false;
  $('shelf').replaceChildren(...data.stories.map(storyRow));
 }
