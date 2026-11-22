@@ -15,29 +15,39 @@ body{min-height:100svh;background:radial-gradient(ellipse at 5% 10%,var(--bloom)
 header{background:transparent;border:0}.landing{max-width:900px;margin:clamp(48px,10vh,110px) auto;padding:0 24px}.landing h1{font:clamp(40px,7vw,72px)/1.1 Georgia,serif;letter-spacing:-.055em;margin:0}.landing>.row{flex-wrap:wrap}.create{width:auto;border-radius:32px;padding:12px 20px;background:var(--wine);color:var(--paper)}.create:hover{background:var(--ink)}
 .shelfList{margin-top:32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px}.storyTile{text-align:left;padding:24px;border-radius:23px;overflow-wrap:anywhere}.storyTile strong{display:block;font:24px Georgia,serif;margin-bottom:10px}.storyTile small{color:var(--muted)}
 .writer{min-height:100svh;padding:clamp(84px,12vh,128px) 22px 85px}.writer #editor{max-width:690px;margin:auto;min-height:68svh;outline:0;caret-color:var(--wine)}.writer #editor:empty:before{content:none}
-.roomNav{position:fixed;left:max(16px,env(safe-area-inset-left));top:max(16px,env(safe-area-inset-top));z-index:1;display:flex;gap:5px;border-radius:32px;padding:4px}.roomNav button,.playerToggle{width:38px;height:38px;padding:0;border-radius:50%;display:grid;place-items:center}.hamb{display:grid;gap:4px;width:16px}.hamb i{height:1.5px;background:currentColor}.typeIcon{font:18px Georgia}
-[popover]{position:fixed;inset:auto;color:var(--ink);border-radius:20px;padding:18px;margin:0;max-height:75svh;overflow:auto}#drawer,#tools{top:72px;left:16px;max-width:calc(100vw - 32px)}#drawer{width:270px}#tools:not(:popover-open){display:none}#drawer h2{margin:16px 0 4px}.sceneList{margin:8px 0}.roomStats{color:var(--muted);font-size:12px;margin:14px 0 0}.playerToggle{position:fixed;bottom:max(16px,env(safe-area-inset-bottom));right:16px;width:48px;height:48px}.playerToggle .disc{margin:0;width:38px;height:38px}.miniCover{position:absolute;width:24px;height:24px;object-fit:contain;border-radius:2px;pointer-events:none}.soundPanel{right:16px;bottom:73px;width:240px}.soundPanel small,.soundPanel a{display:block;margin:6px 0 10px;color:var(--muted)}.soundPanel button{margin-top:10px}.sceneList .selected{background:var(--soft)}
+.roomNav{position:fixed;left:max(16px,env(safe-area-inset-left));top:max(16px,env(safe-area-inset-top));z-index:1;display:flex;gap:5px;border-radius:32px;padding:4px}.roomNav button{width:38px;height:38px;padding:0;border-radius:50%;display:grid;place-items:center}.hamb{display:grid;gap:4px;width:16px}.hamb i{height:1.5px;background:currentColor}.typeIcon{font:18px Georgia}
+[popover]{position:fixed;inset:auto;color:var(--ink);border-radius:20px;padding:18px;margin:0;max-height:75svh;overflow:auto}#drawer,#tools{top:72px;left:16px;max-width:calc(100vw - 32px)}#drawer{width:270px}#tools:not(:popover-open){display:none}#drawer h2{margin:16px 0 4px}.sceneList{margin:8px 0}.roomStats{color:var(--muted);font-size:12px;margin:14px 0 0}.soundPanel{right:16px;bottom:73px;width:240px}.soundPanel small,.soundPanel a{display:block;margin:6px 0 10px;color:var(--muted)}.soundPanel button{margin-top:10px}.sceneList .selected{background:var(--soft)}
 
 #editor{font-size:var(--writing-size,20px)}#editor p{margin:0}
-#miniPlayer{position:fixed;z-index:2;right:16px;bottom:16px;display:flex;align-items:center;gap:5px;max-width:calc(100vw - 16px);padding:4px;border-radius:17px}
-#miniPlayer .playerToggle{position:relative;inset:auto;width:40px;height:40px;flex:none}
-#miniPlayer .playerToggle:hover{background:transparent}
-#transport{width:150px;padding:2px 4px}.transportRow{display:flex;align-items:center;justify-content:space-between}
-.transportRow button{padding:3px 6px;font-size:13px;line-height:20px}
-#clock{display:block;text-align:center;font:11px/1.3 system-ui;font-variant-numeric:tabular-nums;color:var(--muted)}
-#grip{touch-action:none;cursor:grab;padding:4px;align-self:stretch;color:var(--muted);user-select:none}
-#grip:active{cursor:grabbing}.sizeChoice{font-size:13px;padding:5px}
+#miniPlayer{position:fixed;z-index:2;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));width:248px;max-width:calc(100vw - 24px);padding:13px 14px 8px;border-radius:22px;box-shadow:inset 0 1px 1px var(--edge),0 8px 28px #261a2b18}
+.playerTop{display:flex;align-items:center;gap:10px}
+#grip{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:0;text-align:left;touch-action:none;cursor:grab;user-select:none;border-radius:8px}
+#grip:hover{background:transparent}#grip:active{cursor:grabbing;transform:none}
+.artTile{position:relative;display:grid;place-items:center;flex:0 0 44px;height:44px;border-radius:5px;overflow:hidden;background:linear-gradient(145deg,var(--soft),var(--wash));color:var(--wine)}
+.artTile img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.songText{display:grid;min-width:0;gap:2px}.songText>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#track{font-size:14px;line-height:1.3}#artist{font-size:12px;color:var(--muted)}
+#miniPlayer svg{width:19px;height:19px;fill:currentColor;display:block}
+.playerMenu,.transportRow button{display:grid;place-items:center;padding:0;width:34px;height:34px;border-radius:50%}
+.playerMenu{margin-left:auto}.transportRow{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:3px}
+.transportRow #playTrack{width:38px;height:38px;background:var(--soft);color:var(--wine)}
+#transport{margin-top:12px}.timeRow{display:flex;justify-content:space-between;color:var(--muted);font:10px/1.25 system-ui;font-variant-numeric:tabular-nums}
+.timeline{height:3px;border-radius:8px;background:var(--line);overflow:hidden;margin-top:4px}.timeline i{display:block;height:100%;width:0;background:var(--wine);border-radius:inherit}
+#miniPlayer:has(#transport[hidden]){width:216px;padding-bottom:13px}
+#count{position:fixed;left:max(16px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom));z-index:3;border-radius:999px;padding:7px 13px;font:500 12px/1.4 system-ui;font-variant-numeric:tabular-nums;color:var(--ink);pointer-events:none}
+@media(max-width:420px){#miniPlayer{bottom:calc(max(16px,env(safe-area-inset-bottom)) + 38px);width:220px}.writer{padding-bottom:212px}}
+.sizeChoice{font-size:13px;padding:5px}
 </style></head><body>
 <div id="home"><header><div class="brand"><span class="mark" aria-hidden="true"></span>Folio</div><div class="flex"><button id="backups" class="glass">Backups</button><button id="theme" class="glass" aria-label="Switch theme">☾</button></div></header>
 <main class="landing"><div class="row"><h1>Your stories</h1><button id="create" class="create">＋ Create story</button></div><div id="shelf" class="shelfList"></div></main></div>
 <main id="room" class="writer" hidden><nav class="roomNav glass"><button popovertarget="drawer" aria-label="Open scenes and story navigation"><span class="hamb" aria-hidden="true"><i></i><i></i><i></i></span></button><button id="formatToggle" class="typeIcon" popovertarget="tools" aria-label="Text formatting">Aa</button><button id="roomTheme" aria-label="Switch theme">☾</button></nav>
-<aside id="drawer" popover><button id="homeBtn">← Story shelf</button><h2 id="currentStory"></h2><div class="row"><span class="label">Scenes</span><button id="addScene" aria-label="Add scene">＋</button></div><nav id="scenes" class="sceneList" aria-label="Scenes"></nav><button id="rename" class="quiet">Rename scene</button><p class="roomStats"><span id="count"></span> · <span id="saved"></span></p></aside>
+<aside id="drawer" popover><button id="homeBtn">← Story shelf</button><h2 id="currentStory"></h2><div class="row"><span class="label">Scenes</span><button id="addScene" aria-label="Add scene">＋</button></div><nav id="scenes" class="sceneList" aria-label="Scenes"></nav><button id="rename" class="quiet">Rename scene</button><p class="roomStats"><span id="saved"></span></p></aside>
 <div class="toolbar" id="tools" popover role="group" aria-label="Text formatting"><button data-cmd="bold" title="Bold (Ctrl/⌘ B)" aria-label="Bold"><b>B</b></button><button data-cmd="italic" title="Italic (Ctrl/⌘ I)" aria-label="Italic"><i>I</i></button><button data-cmd="underline" title="Underline" aria-label="Underline"><u>U</u></button><span class="sep"></span><span id="alignTools" class="flex" style="gap:0"></span><span class="sep"></span><button id="breakBtn" title="Insert a time skip" aria-label="Insert a time skip">⁂</button><select id="writingSize" class="sizeChoice" aria-label="Writing text size"><option>14</option><option>16</option><option>18</option><option selected>20</option><option>22</option><option>24</option><option>28</option><option>32</option></select><button id="copy" class="copy pill">Copy scene</button></div>
-<div id="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Scene text" spellcheck="true"></div></main>
-<div id="miniPlayer" class="glass"><button class="playerToggle" popovertarget="soundPanel" aria-label="Spotify soundtrack"><span class="disc" id="disc"></span><img class="miniCover" id="cover" hidden alt=""></button>
-<div id="transport" hidden><div id="clock">0:00 / 0:00</div><div class="transportRow"><button id="prevTrack" aria-label="Previous track" title="Previous">◀◀</button><button id="playTrack" aria-label="Play or pause" title="Play or pause">▶</button><button id="nextTrack" aria-label="Next track" title="Next">▶▶</button></div></div>
-<button id="grip" title="Drag player or use arrow keys" aria-label="Move player with arrow keys">⠿</button></div>
-<aside id="soundPanel" popover class="soundPanel"><div class="label">Spotify</div><strong id="track">Quiet room</strong><small id="artist">Spotify is disconnected</small><a id="trackLink" hidden target="_blank" rel="noopener">Open in Spotify ↗</a><button class="pill" id="spotify">Connect Spotify</button></aside>
+<div id="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Scene text" spellcheck="true"></div><span id="count" class="glass">0 words</span></main>
+<section id="miniPlayer" class="glass" aria-label="Spotify player">
+<div class="playerTop"><button id="grip" title="Drag to move or use arrow keys" aria-label="Move Spotify player with arrow keys"><span class="artTile"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 4v12a3 3 0 1 0 2 2V8l8-2v8a3 3 0 1 0 2 2V2z"/></svg><img id="cover" hidden alt=""></span><span class="songText"><strong id="track">Spotify</strong><small id="artist">Disconnected</small></span></button><button class="playerMenu" popovertarget="soundPanel" aria-label="Spotify options"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm8 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm8 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg></button></div>
+<div id="transport" hidden><div class="timeRow"><span id="elapsed">0:00</span><span id="duration">0:00</span></div><div class="timeline" aria-hidden="true"><i id="progressFill"></i></div><div class="transportRow"><button id="prevTrack" aria-label="Previous track" title="Previous track"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h3v14H4z M19 5.5a.8.8 0 0 0-1.2-.7L8 11.3a.85.85 0 0 0 0 1.4l9.8 6.5a.8.8 0 0 0 1.2-.7z"/></svg></button><button id="playTrack" aria-label="Play" title="Play"><svg id="playIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 4.8a1.2 1.2 0 0 1 1.8-1l12.4 7.2a1.2 1.2 0 0 1 0 2L7.8 20.2a1.2 1.2 0 0 1-1.8-1z"/></svg><svg style="display:none" id="pauseIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 4h4v16H6z M14 4h4v16h-4z"/></svg></button><button id="nextTrack" aria-label="Next track" title="Next track"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17 5h3v14h-3z M5 5.5a.8.8 0 0 1 1.2-.7l9.8 6.5a.85.85 0 0 1 0 1.4l-9.8 6.5a.8.8 0 0 1-1.2-.7z"/></svg></button></div></div></section>
+<aside id="soundPanel" popover class="soundPanel"><div class="label">Spotify</div><a id="trackLink" hidden target="_blank" rel="noopener">Open in Spotify ↗</a><button class="pill" id="spotify">Connect Spotify</button></aside>
 <dialog id="modal"><form id="form"><h2 id="heading"></h2><p id="detail"></p><input id="field" aria-labelledby="heading" autocomplete="off"><div id="extra"></div><div class="flex" style="justify-content:flex-end;margin-top:16px"><button type="button" id="close">Close</button><button id="submit" class="primary">Save</button></div></form></dialog><div id="toast" hidden role="status"></div>
 <script>
 'use strict';
@@ -189,15 +199,18 @@ let playback={playing:false,start:0,total:0,at:0},commandPending=false;
 function stamp(ms){const seconds=Math.floor(Math.max(0,ms)/1000);return Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0')}
 function tick(){
  const {start,total,at,playing}=playback;
- $('clock').textContent=total?stamp(Math.min(total,start+(playing?performance.now()-at:0)))+' / '+stamp(total):'— / —';
+ const elapsed=Math.max(0,Math.min(total,start+(playing?performance.now()-at:0)));
+ $('elapsed').textContent=total?stamp(elapsed):'—';$('duration').textContent=total?stamp(total):'—';
+ $('progressFill').style.width=(total?100*elapsed/total:0)+'%';
 }
 setInterval(()=>{if(!document.hidden&&session.access)tick()},500);
 function music(name,by,playing=false,url='',art='',start=0,total=0){
  playback={playing,start:start||0,total:total||0,at:performance.now()};tick();
- $('transport').hidden=!session.access;$('playTrack').textContent=playing?'Ⅱ':'▶';
+ $('transport').hidden=!session.access;$('playIcon').style.display=playing?'none':'block';$('pauseIcon').style.display=playing?'block':'none';
+ $('playTrack').title=playing?'Pause':'Play';
  $('playTrack').setAttribute('aria-label',playing?'Pause':'Play');
  if(position)placePlayer(position.x,position.y);
-const cover=$('cover');if(art){if(cover.getAttribute('src')!==art){cover.hidden=true;cover.onload=()=>cover.hidden=false;cover.onerror=()=>cover.hidden=true;cover.src=art}}else{cover.removeAttribute('src');cover.hidden=true} $('track').textContent=name;$('artist').textContent=by;$('disc').classList.toggle('playing',playing);$('trackLink').hidden=!url;if(url)$('trackLink').href=url;$('spotify').textContent=session.access?'Disconnect Spotify':'Connect Spotify'}
+const cover=$('cover');if(art){if(cover.getAttribute('src')!==art){cover.hidden=true;cover.onload=()=>cover.hidden=false;cover.onerror=()=>cover.hidden=true;cover.src=art}}else{cover.removeAttribute('src');cover.hidden=true} $('track').textContent=name;$('artist').textContent=by;$('trackLink').hidden=!url;if(url)$('trackLink').href=url;$('spotify').textContent=session.access?'Disconnect Spotify':'Connect Spotify'}
 const enc=bytes=>btoa(String.fromCharCode(...bytes)).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
 $('spotify').onclick=()=>{if(session.access){session={};persist();clearTimeout(pollTimer);music('Quiet room','Spotify is disconnected');return}
  if(location.protocol!=='https:'&&location.hostname!=='127.0.0.1'){dialog('Connect Spotify','Open Folio on its HTTPS GitHub Pages address to connect.','',null,null);return}
