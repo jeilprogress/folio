@@ -39,13 +39,15 @@ header{background:transparent;border:0}.landing{max-width:900px;margin:clamp(48p
 .sizeChoice{font-size:13px;padding:5px}
 .openStory{min-width:0;flex:1;text-align:left;padding:10px;border-radius:12px;overflow-wrap:anywhere}.storyGrip,.storyOptions{flex:none;min-width:38px;min-height:42px;color:var(--muted)}.storyGrip{touch-action:none;user-select:none;cursor:grab;font-size:20px}.storyGrip:active{cursor:grabbing}.storyTile.dragSource{opacity:.6}.dropBefore:before,.dropAfter:after{content:"";position:absolute;left:8px;right:8px;height:3px;border-radius:4px;background:var(--wine)}.dropBefore:before{top:-8px}.dropAfter:after{bottom:-8px}.storyActions{width:140px;padding:5px;border-radius:15px}.storyActions button{width:100%;text-align:left;padding:9px 12px}.storyGrip,.storyOptions{display:grid;place-items:center;padding:0;width:40px;height:42px}.storyGrip span{display:block;width:12px;height:18px;background:radial-gradient(circle,currentColor 1.6px,transparent 2px) 0 0/6px 6px}.storyOptions span{display:block;width:18px;height:6px;background:radial-gradient(circle,currentColor 1.6px,transparent 2px) 0 0/6px 6px}.danger{color:var(--wine)}
 .sceneRow{display:flex;align-items:center;gap:4px}.sceneRow>.sceneOpen{flex:1;min-width:0;overflow-wrap:anywhere}.sceneRow>.storyOptions{display:grid;place-items:center;padding:0}.sceneRow .storyActions button{display:block}
+#selectionTools{position:fixed;z-index:12;display:flex;align-items:center;padding:3px;max-width:calc(100vw - 12px);border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);box-shadow:0 4px 18px #251a241c}
+#selectionTools[hidden]{display:none}#selectionTools button{display:grid;place-items:center;width:40px;height:40px;border-radius:9px;touch-action:manipulation}#selectionTools button[aria-pressed=true]{background:var(--soft);color:var(--wine)}#selectionTools button:nth-child(3){margin-left:4px}
 </style></head><body>
 <div id="home"><header><div class="brand"><span class="mark" aria-hidden="true"></span>Folio</div><div class="flex"><button id="syncButton" class="glass">Sync</button><button id="backups" class="glass">Backups</button><button id="theme" class="glass" aria-label="Switch theme">☾</button></div></header>
 <main class="landing"><div class="row"><h1 id="greeting">Hello, Jl.</h1><button id="create" class="create">＋ Create story</button></div><div id="shelf" class="shelfList"></div></main></div>
 <main id="room" class="writer" hidden><nav class="roomNav glass"><button id="homeBtn" class="brand" title="Back to story shelf" aria-label="Folio home, story shelf"><span class="mark" aria-hidden="true"></span>Folio</button><button popovertarget="drawer" aria-label="Open scenes and story navigation"><span class="hamb" aria-hidden="true"><i></i><i></i><i></i></span></button><button id="formatToggle" class="typeIcon" popovertarget="tools" aria-label="Text formatting">Aa</button><button id="roomTheme" aria-label="Switch theme">☾</button></nav>
 <aside id="drawer" popover><h2 id="currentStory"></h2><div class="row"><span class="label">Scenes</span><button id="addScene" aria-label="Add scene">＋</button></div><nav id="scenes" class="sceneList" aria-label="Scenes"></nav><p class="roomStats"><button id="roomSync" aria-label="Open sync settings"><span id="saved"></span></button></p></aside>
 <div class="toolbar" id="tools" popover role="group" aria-label="Text formatting"><button data-cmd="bold" title="Bold (Ctrl/⌘ B)" aria-label="Bold"><b>B</b></button><button data-cmd="italic" title="Italic (Ctrl/⌘ I)" aria-label="Italic"><i>I</i></button><button data-cmd="underline" title="Underline" aria-label="Underline"><u>U</u></button><span class="sep"></span><span id="alignTools" class="flex" style="gap:0"></span><span class="sep"></span><button id="breakBtn" title="Insert a time skip" aria-label="Insert a time skip">⁂</button><select id="writingSize" class="sizeChoice" aria-label="Writing text size"><option>14</option><option>16</option><option>18</option><option selected>20</option><option>22</option><option>24</option><option>28</option><option>32</option></select><button id="copy" class="copy pill">Copy scene</button></div>
-<div id="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Scene text" spellcheck="true"></div><span id="count" class="glass">0 words</span></main>
+<div id="selectionTools" role="toolbar" aria-label="Format selected text" hidden></div><div id="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Scene text" spellcheck="true"></div><span id="count" class="glass">0 words</span></main>
 <section id="miniPlayer" class="glass" aria-label="Spotify player">
 <div class="playerTop"><button id="grip" title="Drag to move or use arrow keys" aria-label="Move Spotify player with arrow keys"><span class="artTile"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 4v12a3 3 0 1 0 2 2V8l8-2v8a3 3 0 1 0 2 2V2z"/></svg><img id="cover" hidden alt=""></span><span class="songText"><strong id="track">Spotify</strong><small id="artist">Disconnected</small></span></button><button class="playerMenu" popovertarget="soundPanel" aria-label="Spotify options"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm8 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm8 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg></button></div>
 <div id="transport" hidden><div class="timeRow"><span id="elapsed">0:00</span><span id="duration">0:00</span></div><div class="timeline" aria-hidden="true"><i id="progressFill"></i></div><div class="transportRow"><button id="prevTrack" aria-label="Previous track" title="Previous track"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h3v14H4z M19 5.5a.8.8 0 0 0-1.2-.7L8 11.3a.85.85 0 0 0 0 1.4l9.8 6.5a.8.8 0 0 0 1.2-.7z"/></svg></button><button id="playTrack" aria-label="Play" title="Play"><svg id="playIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 4.8a1.2 1.2 0 0 1 1.8-1l12.4 7.2a1.2 1.2 0 0 1 0 2L7.8 20.2a1.2 1.2 0 0 1-1.8-1z"/></svg><svg style="display:none" id="pauseIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 4h4v16H6z M14 4h4v16h-4z"/></svg></button><button id="nextTrack" aria-label="Next track" title="Next track"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17 5h3v14h-3z M5 5.5a.8.8 0 0 1 1.2-.7l9.8 6.5a.85.85 0 0 1 0 1.4l-9.8 6.5a.8.8 0 0 1-1.2-.7z"/></svg></button></div></div></section>
@@ -231,7 +233,95 @@ $('formatToggle').onmousedown=e=>e.preventDefault();
 document.addEventListener('selectionchange',updateTools);$('tools').onmousedown=e=>{if(e.target.closest('button'))e.preventDefault()};
 $('tools').onclick=e=>{const cmd=e.target.closest('[data-cmd]')?.dataset.cmd;if(cmd)applyFormat(cmd)};
 $('breakBtn').onclick=()=>{ed.focus();document.execCommand('insertHTML',false,'<p style="text-align:center">⁂</p><p><br></p>')};
-ed.addEventListener('beforeinput',e=>{if(e.inputType!=='insertText'||e.isComposing||!["'",'"'].includes(e.data))return;const sel=getSelection();if(!sel.rangeCount)return;const r=sel.getRangeAt(0).cloneRange();const block=r.startContainer.parentElement?.closest('p,div,li,blockquote')||ed;r.setStart(block,0);const opening=!r.toString()||/[\s([{—]$/u.test(r.toString());e.preventDefault();document.execCommand('insertText',false,e.data==="'"?(opening?'‘':'’'):(opening?'“':'”'))});
+const selectionTools=$('selectionTools');
+for(const cmd of ['bold','italic',...alignments.map(a=>a[1])]){
+ const source=$('tools').querySelector('[data-cmd="'+cmd+'"]');
+ selectionTools.append(source.cloneNode(true));
+}
+let selectedRange, selectionFrame;
+function hideSelectionTools(){selectionTools.hidden=true;selectedRange=null}
+function positionSelectionTools(){
+ const selection=getSelection();
+ if(!selection.rangeCount || selection.isCollapsed || $('room').hidden ||
+    !ed.contains(selection.anchorNode) || !ed.contains(selection.focusNode)){
+  hideSelectionTools();return;
+ }
+ const range=selection.getRangeAt(0);
+ const rects=range.getClientRects();
+ const viewport=window.visualViewport;
+ const left=viewport?.offsetLeft||0, top=viewport?.offsetTop||0;
+ const right=left+(viewport?.width||innerWidth), bottom=top+(viewport?.height||innerHeight);
+ const visible=Array.from(rects).filter(r=>r.width && r.height && r.bottom>top && r.top<bottom);
+ if(!visible.length){hideSelectionTools();return}
+ selectedRange=range.cloneRange();selectionTools.hidden=false;
+ const first=visible[0],last=visible[visible.length-1];
+ const {width,height}=selectionTools.getBoundingClientRect();
+ const below=last.bottom+9, above=first.top-height-9;
+ const preferBelow=matchMedia('(pointer: coarse)').matches;
+ const useBelow=below+height<=bottom-6 && (preferBelow || above<top+6);
+ const anchor=useBelow?last:first;
+ selectionTools.style.left=Math.max(left+6,Math.min(right-width-6,anchor.left+(anchor.width-width)/2))+'px';
+ selectionTools.style.top=Math.max(top+6,Math.min(bottom-height-6,useBelow?below:above))+'px';
+}
+function scheduleSelectionTools(){
+ cancelAnimationFrame(selectionFrame);selectionFrame=requestAnimationFrame(positionSelectionTools);
+}
+selectionTools.addEventListener('pointerdown',e=>{if(e.target.closest('button'))e.preventDefault()});
+selectionTools.addEventListener('mousedown',e=>e.preventDefault());
+selectionTools.onclick=e=>{
+ const cmd=e.target.closest('button')?.dataset.cmd;
+ if(!cmd || !selectedRange || !ed.contains(selectedRange.commonAncestorContainer))return;
+ const range=selectedRange.cloneRange();
+ ed.focus({preventScroll:true});
+ const selection=getSelection();selection.removeAllRanges();selection.addRange(range);
+ applyFormat(cmd);scheduleSelectionTools();
+};
+document.addEventListener('selectionchange',scheduleSelectionTools);
+document.addEventListener('scroll',scheduleSelectionTools,true);
+window.addEventListener('resize',scheduleSelectionTools);
+window.visualViewport?.addEventListener('resize',scheduleSelectionTools);
+window.visualViewport?.addEventListener('scroll',scheduleSelectionTools);
+document.addEventListener('pointerdown',e=>{
+ if(!selectionTools.contains(e.target) && !ed.contains(e.target))hideSelectionTools();
+});
+const quoteBlocks='p,div,li,blockquote,h1,h2,h3,h4,h5,h6,pre';
+function precedingCharacter(container,offset){
+ const parent=container.nodeType===Node.ELEMENT_NODE?container:container.parentElement;
+ const block=parent.closest(quoteBlocks)||ed;
+ let node=container;
+ if(node.nodeType===Node.TEXT_NODE && offset)return node.data[offset-1];
+ let previous=node.childNodes[offset-1];
+ while(true){
+  if(previous){
+   node=previous;
+   while(node.nodeType===Node.ELEMENT_NODE){
+    if(node.matches('br,'+quoteBlocks))return '';
+    if(!node.lastChild)break;
+    node=node.lastChild;
+   }
+   if(node.nodeType===Node.TEXT_NODE && node.length)return node.data.slice(-1);
+  }
+  while(node!==block && !node.previousSibling)node=node.parentNode;
+  if(node===block)return '';
+  previous=node.previousSibling;
+ }
+}
+let insertingQuote=false;
+ed.addEventListener('beforeinput',event=>{
+ if(insertingQuote || !event.cancelable || event.isComposing || event.inputType!=='insertText' ||
+    !['"',"'","“","”","‘","’"].includes(event.data))return;
+ const selection=getSelection();
+ if(!selection.rangeCount)return;
+ const range=selection.getRangeAt(0);
+ if(!ed.contains(range.commonAncestorContainer))return;
+ const previous=precedingCharacter(range.startContainer,range.startOffset);
+ const opening=!previous || /[\s([{—–]/u.test(previous);
+ const single=["'","‘","’"].includes(event.data);
+ const quote=single?(opening?'‘':'’'):(opening?'“':'”');
+ if(quote===event.data)return;
+ event.preventDefault();insertingQuote=true;
+ try{document.execCommand('insertText',false,quote)}finally{insertingQuote=false}
+});
 </script>
 <script>
 const escapeHtml=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
