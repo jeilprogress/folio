@@ -103,15 +103,17 @@ const alignments=[
 for(const [label,cmd,key] of alignments){
  const b=document.createElement('button');
  b.dataset.cmd=cmd;
- b.title=b.ariaLabel=(label==='justify'?'Justify':'Align '+label)+' (Ctrl/⌘+Shift+'+key+')';
- b.setAttribute('aria-keyshortcuts','Control+Shift+'+key+' Meta+Shift+'+key);
+ b.title=b.ariaLabel=(label==='justify'?'Justify':'Align '+label)+ (label==='right'?' (Ctrl+Alt+R)':' (Ctrl/⌘+Shift+'+key+')');
+ b.setAttribute('aria-keyshortcuts',label==='right'?'Control+Alt+R':'Control+Shift+'+key+' Meta+Shift+'+key);
  b.innerHTML='<span class="align '+label+'"><i></i><i></i><i></i><i></i></span>';
  $('alignTools').append(b);
 }
 function applyFormat(cmd){ed.focus();document.execCommand(cmd);updateTools()}
 ed.addEventListener('keydown',event=>{
- if(event.defaultPrevented||event.isComposing||event.altKey||!event.shiftKey||event.ctrlKey===event.metaKey)return;
- const alignment=alignments.find(([, ,key])=>key===event.key.toUpperCase());
+ if(event.defaultPrevented||event.isComposing||event.getModifierState?.('AltGraph'))return;
+ const rightChord=event.ctrlKey&&event.altKey&&!event.metaKey&&!event.shiftKey;
+ const otherChord=event.shiftKey&&!event.altKey&&event.ctrlKey!==event.metaKey;
+ const alignment=alignments.find(([label,,key])=>label==='right'?rightChord&&(event.code==='KeyR'||event.key.toUpperCase()==='R'):otherChord&&key===event.key.toUpperCase());
  if(!alignment)return;
  event.preventDefault();
  applyFormat(alignment[1]);
