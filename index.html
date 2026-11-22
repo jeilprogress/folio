@@ -40,10 +40,10 @@ header{background:transparent;border:0}.landing{max-width:900px;margin:clamp(48p
 .openStory{min-width:0;flex:1;text-align:left;padding:10px;border-radius:12px;overflow-wrap:anywhere}.storyGrip,.storyOptions{flex:none;min-width:38px;min-height:42px;color:var(--muted)}.storyGrip{touch-action:none;user-select:none;cursor:grab;font-size:20px}.storyGrip:active{cursor:grabbing}.storyTile.dragSource{opacity:.6}.dropBefore:before,.dropAfter:after{content:"";position:absolute;left:8px;right:8px;height:3px;border-radius:4px;background:var(--wine)}.dropBefore:before{top:-8px}.dropAfter:after{bottom:-8px}.storyActions{width:140px;padding:5px;border-radius:15px}.storyActions button{width:100%;text-align:left;padding:9px 12px}.storyGrip,.storyOptions{display:grid;place-items:center;padding:0;width:40px;height:42px}.storyGrip span{display:block;width:12px;height:18px;background:radial-gradient(circle,currentColor 1.6px,transparent 2px) 0 0/6px 6px}.storyOptions span{display:block;width:18px;height:6px;background:radial-gradient(circle,currentColor 1.6px,transparent 2px) 0 0/6px 6px}.danger{color:var(--wine)}
 .sceneRow{display:flex;align-items:center;gap:4px}.sceneRow>.sceneOpen{flex:1;min-width:0;overflow-wrap:anywhere}.sceneRow>.storyOptions{display:grid;place-items:center;padding:0}.sceneRow .storyActions button{display:block}
 </style></head><body>
-<div id="home"><header><div class="brand"><span class="mark" aria-hidden="true"></span>Folio</div><div class="flex"><button id="backups" class="glass">Backups</button><button id="theme" class="glass" aria-label="Switch theme">☾</button></div></header>
+<div id="home"><header><div class="brand"><span class="mark" aria-hidden="true"></span>Folio</div><div class="flex"><button id="syncButton" class="glass">Sync</button><button id="backups" class="glass">Backups</button><button id="theme" class="glass" aria-label="Switch theme">☾</button></div></header>
 <main class="landing"><div class="row"><h1 id="greeting">Hello, Jl.</h1><button id="create" class="create">＋ Create story</button></div><div id="shelf" class="shelfList"></div></main></div>
 <main id="room" class="writer" hidden><nav class="roomNav glass"><button id="homeBtn" class="brand" title="Back to story shelf" aria-label="Folio home, story shelf"><span class="mark" aria-hidden="true"></span>Folio</button><button popovertarget="drawer" aria-label="Open scenes and story navigation"><span class="hamb" aria-hidden="true"><i></i><i></i><i></i></span></button><button id="formatToggle" class="typeIcon" popovertarget="tools" aria-label="Text formatting">Aa</button><button id="roomTheme" aria-label="Switch theme">☾</button></nav>
-<aside id="drawer" popover><h2 id="currentStory"></h2><div class="row"><span class="label">Scenes</span><button id="addScene" aria-label="Add scene">＋</button></div><nav id="scenes" class="sceneList" aria-label="Scenes"></nav><p class="roomStats"><span id="saved"></span></p></aside>
+<aside id="drawer" popover><h2 id="currentStory"></h2><div class="row"><span class="label">Scenes</span><button id="addScene" aria-label="Add scene">＋</button></div><nav id="scenes" class="sceneList" aria-label="Scenes"></nav><p class="roomStats"><button id="roomSync" aria-label="Open sync settings"><span id="saved"></span></button></p></aside>
 <div class="toolbar" id="tools" popover role="group" aria-label="Text formatting"><button data-cmd="bold" title="Bold (Ctrl/⌘ B)" aria-label="Bold"><b>B</b></button><button data-cmd="italic" title="Italic (Ctrl/⌘ I)" aria-label="Italic"><i>I</i></button><button data-cmd="underline" title="Underline" aria-label="Underline"><u>U</u></button><span class="sep"></span><span id="alignTools" class="flex" style="gap:0"></span><span class="sep"></span><button id="breakBtn" title="Insert a time skip" aria-label="Insert a time skip">⁂</button><select id="writingSize" class="sizeChoice" aria-label="Writing text size"><option>14</option><option>16</option><option>18</option><option selected>20</option><option>22</option><option>24</option><option>28</option><option>32</option></select><button id="copy" class="copy pill">Copy scene</button></div>
 <div id="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Scene text" spellcheck="true"></div><span id="count" class="glass">0 words</span></main>
 <section id="miniPlayer" class="glass" aria-label="Spotify player">
@@ -61,7 +61,7 @@ function valid(d){return d&&Array.isArray(d.stories)&&d.stories.every(s=>typeof 
 try{const raw=localStorage.getItem(key);if(raw){const d=JSON.parse(raw);if(!valid(d))throw Error();data=d}}catch{readError=true}
 const story=()=>data.stories.find(x=>x.id===data.story)||data.stories[0], scene=()=>story().scenes.find(x=>x.id===data.scene)||story().scenes[0];
 let base;try{base=localStorage.getItem(key)}catch{}
-function save(){try{if(readError||localStorage.getItem(key)!==base)throw Error();const value=JSON.stringify(data);localStorage.setItem(key,value);base=value;$('saved').textContent='● Saved on this device';return true}catch{$('saved').textContent='Unsaved · export a backup';notice('Draft could not be saved. Open Backups on the story shelf.')}}
+function save(signal=true){try{if(readError||localStorage.getItem(key)!==base)throw Error();const value=JSON.stringify(data);localStorage.setItem(key,value);base=value;if(signal)queueMicrotask(()=>window.dispatchEvent(new Event('folio-save')));$('saved').textContent='● Saved on this device';return true}catch{$('saved').textContent='Unsaved · export a backup';notice('Draft could not be saved. Open Backups on the story shelf.')}}
 function notice(t){$('toast').textContent=t;$('toast').hidden=false;clearTimeout(notice.timer);notice.timer=setTimeout(()=>$('toast').hidden=true,4200)}
 function count(){const n=(ed.innerText.match(/[\p{L}\p{N}]+(?:[’'\-][\p{L}\p{N}]+)*/gu)||[]).length;$('count').textContent=n+' word'+(n===1?'':'s')}
 function closePanels(){for(const el of document.querySelectorAll(':popover-open'))el.hidePopover()}
@@ -131,7 +131,7 @@ function storyRow(s){
  row.append(grip,open);
  appendOptions(row,s.name,
   ()=>dialog('Rename story','','Save title',s.name,name=>shelfChange(data.stories.map(v=>v.id===s.id?{...v,name}:v))),
-  ()=>{dialog('Delete story?','This permanently deletes “'+s.name+'” and all its scenes from this browser.','Delete story',null,()=>shelfChange(data.stories.filter(v=>v.id!==s.id)));$('close').focus()}
+  ()=>{dialog('Delete story?','This permanently deletes “'+s.name+'” and all its scenes from your shelf and connected devices.','Delete story',null,()=>shelfChange(data.stories.filter(v=>v.id!==s.id)));$('close').focus()}
  );
  return row;
 }
@@ -169,7 +169,7 @@ function dragStory(event,grip,row,id){
  }
  grip.onpointerup=grip.onlostpointercapture=grip.onpointercancel=finish;
 }
-function render(){
+function render(keepEditor=false){
  const s=story();s.lastScene=scene().id;$('currentStory').textContent=s.name;
  $('scenes').replaceChildren(...s.scenes.map((v,i)=>{
   const label=v.title||'Scene '+(i+1),row=document.createElement('div'),b=document.createElement('button');
@@ -182,7 +182,7 @@ function render(){
   );
   return row;
  }));
- ed.innerHTML=scene().html;count();updateTools();
+ if(!keepEditor)ed.innerHTML=scene().html;count();updateTools();
 }
 $('homeBtn').onclick=()=>{goHome();$('create').focus()};
 function editScene(s,target,title){
@@ -318,7 +318,7 @@ ed.addEventListener('copy',event=>{
 });
 $('copy').onclick=async()=>{if(!ed.innerText.trim()){notice('This scene is empty');return}try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([clipboardHTML(ed.innerHTML)],{type:'text/html'}),'text/plain':new Blob([ed.innerText],{type:'text/plain'})})]);notice('Scene copied with formatting')}catch{ed.focus();const r=document.createRange();r.selectNodeContents(ed);getSelection().removeAllRanges();getSelection().addRange(r);notice(document.execCommand('copy')?'Scene copied':'Scene selected · press Ctrl/Cmd+C')}};
 function download(){const a=document.createElement('a');const url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.href=url;a.download='folio-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000)}
-$('backups').onclick=()=>{dialog('Story backups','Drafts live in this browser. Download all stories or import a backup as additional stories.', '',null,null);const down=document.createElement('button');down.type='button';down.className='pill';down.textContent='Download backup';down.onclick=download;const input=document.createElement('input');input.type='file';input.accept='.json';input.ariaLabel='Import backup';input.onchange=async()=>{try{const d=JSON.parse(await input.files[0].text());if(!valid(d))throw Error();if(!d.stories.length){notice('This backup has no stories');return}const items=d.stories.map(s=>({id:uid(),name:s.name,scenes:s.scenes.map(x=>({id:uid(),title:x.title,html:clean(x.html)}))}));data.stories.push(...items);data.story=items[0].id;data.scene=items[0].scenes[0].id;save();modal.close();goHome();notice('Backup imported')}catch{notice('Could not read this backup')}};$('extra').append(down,input)};
+$('backups').onclick=()=>{dialog('Story backups','Download all stories or import a backup as additional stories.', '',null,null);const down=document.createElement('button');down.type='button';down.className='pill';down.textContent='Download backup';down.onclick=download;const input=document.createElement('input');input.type='file';input.accept='.json';input.ariaLabel='Import backup';input.onchange=async()=>{try{const d=JSON.parse(await input.files[0].text());if(!valid(d))throw Error();if(!d.stories.length){notice('This backup has no stories');return}const items=d.stories.map(s=>({id:uid(),name:s.name,scenes:s.scenes.map(x=>({id:uid(),title:x.title,html:clean(x.html)}))}));data.stories.push(...items);data.story=items[0].id;data.scene=items[0].scenes[0].id;save();modal.close();goHome();notice('Backup imported')}catch{notice('Could not read this backup')}};$('extra').append(down,input)};
 goHome();$('saved').textContent=readError?'Storage unavailable · use Backups':'● Saved on this device';
 </script><script>
 const redirect=location.origin+location.pathname, api='https://api.spotify.com/v1/me/player/currently-playing', tokenURL='https://accounts.spotify.com/api/token', sessionKey='folio.spotify:'+location.pathname;
@@ -418,4 +418,5 @@ window.addEventListener('storage',event=>{
  if(session.access)poll();else music('Spotify','Disconnected');
 });
 document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(pollTimer);else poll()});initMusic();
-</script></body></html>
+</script><dialog id="syncDialog"><h2>Sync your drafts</h2><p id="syncAccount"></p><p id="syncMessage" role="status"></p><form id="syncLogin" hidden><label>Email <input id="syncEmail" type="email" autocomplete="username" required></label><label>Password <input id="syncPassword" type="password" autocomplete="current-password" required></label><div class="flex"><button class="primary">Sign in</button><button id="syncRegister" class="pill">Create account</button></div></form><button id="syncLogout" class="pill" hidden>Sign out</button> <button id="syncClose" class="pill">Close</button></dialog>
+<script src="./firebase-config.js"></script><script src="./sync.js"></script></body></html>

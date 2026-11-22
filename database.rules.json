@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "folios": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['content', 'revision'])",
+        "content": { ".validate": "newData.isString()" },
+        "revision": { ".validate": "newData.isString()" },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}
