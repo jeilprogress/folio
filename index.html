@@ -13,7 +13,7 @@ header{height:78px;border-bottom:1px solid var(--line);display:flex;align-items:
 body{min-height:100svh;background:radial-gradient(ellipse at 5% 10%,var(--bloom),transparent 55%),radial-gradient(ellipse at 95% 85%,var(--glow),transparent 58%),var(--bg);background-attachment:fixed}
 .glass,[popover],dialog,.storyTile{background:var(--glass);backdrop-filter:blur(24px) saturate(145%);-webkit-backdrop-filter:blur(24px) saturate(145%);border:1px solid var(--edge);box-shadow:inset 0 1px 1px #ffffff60,0 9px 32px #36283b0c}
 header{background:transparent;border:0}.landing{max-width:900px;margin:clamp(48px,10vh,110px) auto;padding:0 24px}.landing h1{font:clamp(40px,7vw,72px)/1.1 Georgia,serif;letter-spacing:-.055em;margin:0}.landing>.row{flex-wrap:wrap}.create{width:auto;border-radius:32px;padding:12px 20px;background:var(--wine);color:var(--paper)}.create:hover{background:var(--ink)}
-.shelfList{margin-top:32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px}.storyTile{text-align:left;padding:24px;border-radius:23px;overflow-wrap:anywhere}.storyTile strong{display:block;font:24px Georgia,serif;margin-bottom:10px}.storyTile small{color:var(--muted)}
+.shelfList{margin-top:32px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px}.storyTile{position:relative;display:flex;align-items:center;gap:8px;text-align:left;padding:10px 14px;border-radius:23px;overflow-wrap:anywhere}.storyTile strong{display:block;font:24px Georgia,serif;margin-bottom:10px}.storyTile small{color:var(--muted)}
 .writer{min-height:100svh;padding:clamp(84px,12vh,128px) 22px 85px}.writer #editor{max-width:690px;margin:auto;min-height:68svh;outline:0;caret-color:var(--wine)}.writer #editor:empty:before{content:none}
 .roomNav{position:fixed;left:max(16px,env(safe-area-inset-left));top:max(16px,env(safe-area-inset-top));z-index:1;display:flex;gap:5px;border-radius:32px;padding:4px}.roomNav button{width:38px;height:38px;padding:0;border-radius:50%;display:grid;place-items:center}.hamb{display:grid;gap:4px;width:16px}.hamb i{height:1.5px;background:currentColor}.typeIcon{font:18px Georgia}
 [popover]{position:fixed;inset:auto;color:var(--ink);border-radius:20px;padding:18px;margin:0;max-height:75svh;overflow:auto}#drawer,#tools{top:72px;left:16px;max-width:calc(100vw - 32px)}#drawer{width:270px}#tools:not(:popover-open){display:none}#drawer h2{margin:16px 0 4px}.sceneList{margin:8px 0}.roomStats{color:var(--muted);font-size:12px;margin:14px 0 0}.soundPanel{right:16px;bottom:73px;width:240px}.soundPanel small,.soundPanel a{display:block;margin:6px 0 10px;color:var(--muted)}.soundPanel button{margin-top:10px}.sceneList .selected{background:var(--soft)}
@@ -37,6 +37,7 @@ header{background:transparent;border:0}.landing{max-width:900px;margin:clamp(48p
 #count{position:fixed;left:max(16px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom));z-index:3;border-radius:999px;padding:7px 13px;font:500 12px/1.4 system-ui;font-variant-numeric:tabular-nums;color:var(--ink);pointer-events:none}
 @media(max-width:420px){#miniPlayer{bottom:calc(max(16px,env(safe-area-inset-bottom)) + 38px);width:220px}.writer{padding-bottom:212px}}
 .sizeChoice{font-size:13px;padding:5px}
+.openStory{min-width:0;flex:1;text-align:left;padding:10px;border-radius:12px;overflow-wrap:anywhere}.storyGrip,.storyOptions{flex:none;min-width:38px;min-height:42px;color:var(--muted)}.storyGrip{touch-action:none;user-select:none;cursor:grab;font-size:20px}.storyGrip:active{cursor:grabbing}.storyTile.dragSource{opacity:.6}.dropBefore:before,.dropAfter:after{content:"";position:absolute;left:8px;right:8px;height:3px;border-radius:4px;background:var(--wine)}.dropBefore:before{top:-8px}.dropAfter:after{bottom:-8px}.storyActions{display:grid;gap:4px}.storyActions button{text-align:left}.danger{color:var(--wine)}
 </style></head><body>
 <div id="home"><header><div class="brand"><span class="mark" aria-hidden="true"></span>Folio</div><div class="flex"><button id="backups" class="glass">Backups</button><button id="theme" class="glass" aria-label="Switch theme">☾</button></div></header>
 <main class="landing"><div class="row"><h1>Your stories</h1><button id="create" class="create">＋ Create story</button></div><div id="shelf" class="shelfList"></div></main></div>
@@ -59,7 +60,7 @@ function valid(d){return d&&Array.isArray(d.stories)&&d.stories.every(s=>typeof 
 try{const raw=localStorage.getItem(key);if(raw){const d=JSON.parse(raw);if(!valid(d))throw Error();data=d}}catch{readError=true}
 const story=()=>data.stories.find(x=>x.id===data.story)||data.stories[0], scene=()=>story().scenes.find(x=>x.id===data.scene)||story().scenes[0];
 let base;try{base=localStorage.getItem(key)}catch{}
-function save(){try{if(readError||localStorage.getItem(key)!==base)throw Error();const value=JSON.stringify(data);localStorage.setItem(key,value);base=value;$('saved').textContent='● Saved on this device'}catch{$('saved').textContent='Unsaved · export a backup';notice('Draft could not be saved. Open Backups on the story shelf.')}}
+function save(){try{if(readError||localStorage.getItem(key)!==base)throw Error();const value=JSON.stringify(data);localStorage.setItem(key,value);base=value;$('saved').textContent='● Saved on this device';return true}catch{$('saved').textContent='Unsaved · export a backup';notice('Draft could not be saved. Open Backups on the story shelf.')}}
 function notice(t){$('toast').textContent=t;$('toast').hidden=false;clearTimeout(notice.timer);notice.timer=setTimeout(()=>$('toast').hidden=true,4200)}
 function count(){const n=(ed.innerText.match(/[\p{L}\p{N}]+(?:[’'\-][\p{L}\p{N}]+)*/gu)||[]).length;$('count').textContent=n+' word'+(n===1?'':'s')}
 function closePanels(){for(const el of document.querySelectorAll(':popover-open'))el.hidePopover()}
@@ -71,11 +72,86 @@ function openRoom(s){
 }
 function goHome(){
  closePanels();$('room').hidden=true;$('home').hidden=false;
- $('shelf').replaceChildren(...data.stories.map(s=>{
-  const button=document.createElement('button'),title=document.createElement('strong'),info=document.createElement('small');
-  button.className='storyTile';title.textContent=s.name;info.textContent=s.scenes.length+(s.scenes.length===1?' scene':' scenes');
-  button.append(title,info);button.onclick=()=>openRoom(s);return button;
- }));
+ $('shelf').replaceChildren(...data.stories.map(storyRow));
+}
+function shelfChange(stories){
+ const next=stories.find(s=>s.id===data.story)||stories[0];
+ const previous=data;
+ data={...data,stories,story:next?.id??null,scene:next?.scenes.find(s=>s.id===data.scene)?.id??next?.scenes[0].id??null};
+ if(!save()){data=previous;return false}
+ goHome();return true;
+}
+function moveStory(id,to){
+ const stories=data.stories.slice(),from=stories.findIndex(s=>s.id===id);
+ if(from<0||to<0||to>=stories.length||from===to)return;
+ stories.splice(to,0,stories.splice(from,1)[0]);shelfChange(stories);
+}
+function storyOptions(s){
+ dialog(s.name,'','',null,null);
+ const actions=document.createElement('div');actions.className='storyActions';
+ const add=(label,fn,disabled=false)=>{
+  const btn=document.createElement('button');btn.type='button';btn.textContent=label;btn.disabled=disabled;
+  btn.onclick=()=>{modal.close();fn()};actions.append(btn);return btn;
+ };
+ add('Rename story',()=>dialog('Rename story','','Save title',s.name,name=>shelfChange(data.stories.map(v=>v.id===s.id?{...v,name}:v))));
+ const i=data.stories.indexOf(s);
+ if(data.stories.length>1){
+  add('Move up',()=>moveStory(s.id,i-1),i===0);
+  add('Move down',()=>moveStory(s.id,i+1),i===data.stories.length-1);
+ }
+ add('Delete story…',()=>{dialog('Delete story?','This permanently deletes “'+s.name+'” and all its scenes from this browser.','Delete story',null,()=>shelfChange(data.stories.filter(v=>v.id!==s.id)));$('close').focus()}).className='danger';
+ $('extra').append(actions);
+}
+function storyRow(s){
+ const row=document.createElement('div'),grip=document.createElement('button'),open=document.createElement('button'),menu=document.createElement('button');
+ row.className='storyTile';row.dataset.storyId=s.id;
+ grip.className='storyGrip';grip.textContent='⠿';grip.hidden=data.stories.length<2;
+ grip.setAttribute('aria-label','Reorder '+s.name);grip.title='Drag to reorder, or use the arrow keys';
+ grip.onkeydown=e=>{
+  if(!['ArrowUp','ArrowDown'].includes(e.key))return;
+  e.preventDefault();moveStory(s.id,data.stories.indexOf(s)+(e.key==='ArrowUp'?-1:1));
+  Array.from($('shelf').children).find(r=>r.dataset.storyId===s.id)?.querySelector('.storyGrip').focus();
+ };
+ grip.onpointerdown=e=>dragStory(e,grip,row,s.id);
+ const title=document.createElement('strong'),info=document.createElement('small');
+ open.className='openStory';title.textContent=s.name;info.textContent=s.scenes.length+(s.scenes.length===1?' scene':' scenes');
+ open.append(title,info);open.onclick=()=>openRoom(s);
+ menu.className='storyOptions';menu.textContent='•••';menu.setAttribute('aria-label','Options for '+s.name);menu.onclick=()=>storyOptions(s);
+ row.append(grip,open,menu);return row;
+}
+function dragStory(event,grip,row,id){
+ if(!event.isPrimary||event.button!==0)return;
+ const pointer=event.pointerId,others=Array.from($('shelf').children).filter(r=>r!==row);
+ if(!others.length)return;
+ let y=event.clientY,target=data.stories.findIndex(s=>s.id===id),frame=0,moved=false;
+ grip.setPointerCapture(pointer);
+ function preview(){
+  if(!moved)return;
+  const scroll=y<50?-10:y>innerHeight-50?10:0;
+  if(scroll)window.scrollBy(0,scroll);
+  target=others.findIndex(r=>{const b=r.getBoundingClientRect();return y<b.top+b.height/2});
+  if(target<0)target=others.length;
+  for(const r of others)r.classList.remove('dropBefore','dropAfter');
+  const marker=others[Math.min(target,others.length-1)];
+  marker.classList.add(target===others.length?'dropAfter':'dropBefore');
+  frame=requestAnimationFrame(preview);
+ }
+ grip.onpointermove=e=>{
+  if(e.pointerId!==pointer)return;
+  y=e.clientY;
+  if(!moved&&Math.abs(y-event.clientY)>4){moved=true;row.classList.add('dragSource');preview()}
+ };
+ function finish(e){
+  if(e.pointerId!==pointer)return;
+  cancelAnimationFrame(frame);row.classList.remove('dragSource');
+  for(const r of others)r.classList.remove('dropBefore','dropAfter');
+  grip.onpointermove=grip.onpointerup=grip.onlostpointercapture=grip.onpointercancel=null;
+  if(e.type==='pointerup'&&moved){
+   target=others.findIndex(r=>{const b=r.getBoundingClientRect();return e.clientY<b.top+b.height/2});
+   moveStory(id,target<0?others.length:target);
+  }
+ }
+ grip.onpointerup=grip.onlostpointercapture=grip.onpointercancel=finish;
 }
 function render(){
  const s=story();s.lastScene=scene().id;$('currentStory').textContent=s.name;
