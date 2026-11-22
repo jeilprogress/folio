@@ -38,11 +38,12 @@ header{background:transparent;border:0}.landing{max-width:900px;margin:clamp(48p
 @media(max-width:420px){#miniPlayer{bottom:calc(max(16px,env(safe-area-inset-bottom)) + 38px);width:220px}.writer{padding-bottom:212px}}
 .sizeChoice{font-size:13px;padding:5px}
 .openStory{min-width:0;flex:1;text-align:left;padding:10px;border-radius:12px;overflow-wrap:anywhere}.storyGrip,.storyOptions{flex:none;min-width:38px;min-height:42px;color:var(--muted)}.storyGrip{touch-action:none;user-select:none;cursor:grab;font-size:20px}.storyGrip:active{cursor:grabbing}.storyTile.dragSource{opacity:.6}.dropBefore:before,.dropAfter:after{content:"";position:absolute;left:8px;right:8px;height:3px;border-radius:4px;background:var(--wine)}.dropBefore:before{top:-8px}.dropAfter:after{bottom:-8px}.storyActions{width:140px;padding:5px;border-radius:15px}.storyActions button{width:100%;text-align:left;padding:9px 12px}.storyGrip,.storyOptions{display:grid;place-items:center;padding:0;width:40px;height:42px}.storyGrip span{display:block;width:12px;height:18px;background:radial-gradient(circle,currentColor 1.6px,transparent 2px) 0 0/6px 6px}.storyOptions span{display:block;width:18px;height:6px;background:radial-gradient(circle,currentColor 1.6px,transparent 2px) 0 0/6px 6px}.danger{color:var(--wine)}
+.sceneRow{display:flex;align-items:center;gap:4px}.sceneRow>.sceneOpen{flex:1;min-width:0;overflow-wrap:anywhere}.sceneRow>.storyOptions{display:grid;place-items:center;padding:0}.sceneRow .storyActions button{display:block}
 </style></head><body>
 <div id="home"><header><div class="brand"><span class="mark" aria-hidden="true"></span>Folio</div><div class="flex"><button id="backups" class="glass">Backups</button><button id="theme" class="glass" aria-label="Switch theme">☾</button></div></header>
 <main class="landing"><div class="row"><h1 id="greeting">Hello, Jl.</h1><button id="create" class="create">＋ Create story</button></div><div id="shelf" class="shelfList"></div></main></div>
 <main id="room" class="writer" hidden><nav class="roomNav glass"><button popovertarget="drawer" aria-label="Open scenes and story navigation"><span class="hamb" aria-hidden="true"><i></i><i></i><i></i></span></button><button id="formatToggle" class="typeIcon" popovertarget="tools" aria-label="Text formatting">Aa</button><button id="roomTheme" aria-label="Switch theme">☾</button></nav>
-<aside id="drawer" popover><button id="homeBtn">← Story shelf</button><h2 id="currentStory"></h2><div class="row"><span class="label">Scenes</span><button id="addScene" aria-label="Add scene">＋</button></div><nav id="scenes" class="sceneList" aria-label="Scenes"></nav><button id="rename" class="quiet">Rename scene</button><p class="roomStats"><span id="saved"></span></p></aside>
+<aside id="drawer" popover><button id="homeBtn">← Story shelf</button><h2 id="currentStory"></h2><div class="row"><span class="label">Scenes</span><button id="addScene" aria-label="Add scene">＋</button></div><nav id="scenes" class="sceneList" aria-label="Scenes"></nav><p class="roomStats"><span id="saved"></span></p></aside>
 <div class="toolbar" id="tools" popover role="group" aria-label="Text formatting"><button data-cmd="bold" title="Bold (Ctrl/⌘ B)" aria-label="Bold"><b>B</b></button><button data-cmd="italic" title="Italic (Ctrl/⌘ I)" aria-label="Italic"><i>I</i></button><button data-cmd="underline" title="Underline" aria-label="Underline"><u>U</u></button><span class="sep"></span><span id="alignTools" class="flex" style="gap:0"></span><span class="sep"></span><button id="breakBtn" title="Insert a time skip" aria-label="Insert a time skip">⁂</button><select id="writingSize" class="sizeChoice" aria-label="Writing text size"><option>14</option><option>16</option><option>18</option><option selected>20</option><option>22</option><option>24</option><option>28</option><option>32</option></select><button id="copy" class="copy pill">Copy scene</button></div>
 <div id="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Scene text" spellcheck="true"></div><span id="count" class="glass">0 words</span></main>
 <section id="miniPlayer" class="glass" aria-label="Spotify player">
@@ -95,15 +96,23 @@ function moveStory(id,to){
  if(from<0||to<0||to>=stories.length||from===to)return;
  stories.splice(to,0,stories.splice(from,1)[0]);shelfChange(stories);
 }
-function storyActions(s){
+function appendOptions(row,label,rename,remove){
  const actions=document.createElement('div');actions.className='storyActions';
  const add=(label,fn)=>{
   const btn=document.createElement('button');btn.type='button';btn.textContent=label;
-  btn.onclick=()=>{actions.hidePopover();fn()};btn.setAttribute('aria-label',label+' · '+s.name);actions.append(btn);return btn;
+  btn.onclick=()=>{actions.hidePopover();fn()};btn.setAttribute('aria-label',label+' · '+label);actions.append(btn);return btn;
  };
- add('Rename',()=>dialog('Rename story','','Save title',s.name,name=>shelfChange(data.stories.map(v=>v.id===s.id?{...v,name}:v))));
- add('Delete',()=>{dialog('Delete story?','This permanently deletes “'+s.name+'” and all its scenes from this browser.','Delete story',null,()=>shelfChange(data.stories.filter(v=>v.id!==s.id)));$('close').focus()}).className='danger';
- return actions;
+ add('Rename',rename);add('Delete',remove).className='danger';
+ const menu=document.createElement('button');
+ menu.className='storyOptions';menu.setAttribute('aria-label','Options for '+label);
+ menu.innerHTML='<span aria-hidden="true"></span>';actions.popover='auto';menu.popoverTargetElement=actions;
+ actions.addEventListener('beforetoggle',e=>{
+  if(e.newState!=='open')return;
+  const rect=menu.getBoundingClientRect();
+  actions.style.left=Math.max(4,Math.min(innerWidth-144,rect.right-140))+'px';
+  actions.style.top=(rect.bottom+110<innerHeight?rect.bottom+4:Math.max(4,rect.top-96))+'px';
+ });
+ row.append(menu,actions);
 }
 function storyRow(s){
  const row=document.createElement('div'),grip=document.createElement('button'),open=document.createElement('button');
@@ -119,16 +128,12 @@ function storyRow(s){
  const title=document.createElement('strong'),info=document.createElement('small');
  open.className='openStory';title.textContent=s.name;info.textContent=s.scenes.length+(s.scenes.length===1?' scene':' scenes');
  open.append(title,info);open.onclick=()=>openRoom(s);
- const menu=document.createElement('button'),actions=storyActions(s);
- menu.className='storyOptions';menu.setAttribute('aria-label','Options for '+s.name);
- menu.innerHTML='<span aria-hidden="true"></span>';actions.popover='auto';menu.popoverTargetElement=actions;
- actions.addEventListener('beforetoggle',e=>{
-  if(e.newState!=='open')return;
-  const rect=menu.getBoundingClientRect();
-  actions.style.left=Math.max(4,Math.min(innerWidth-144,rect.right-140))+'px';
-  actions.style.top=(rect.bottom+110<innerHeight?rect.bottom+4:Math.max(4,rect.top-96))+'px';
- });
- row.append(grip,open,menu,actions);return row;
+ row.append(grip,open);
+ appendOptions(row,s.name,
+  ()=>dialog('Rename story','','Save title',s.name,name=>shelfChange(data.stories.map(v=>v.id===s.id?{...v,name}:v))),
+  ()=>{dialog('Delete story?','This permanently deletes “'+s.name+'” and all its scenes from this browser.','Delete story',null,()=>shelfChange(data.stories.filter(v=>v.id!==s.id)));$('close').focus()}
+ );
+ return row;
 }
 function dragStory(event,grip,row,id){
  if(!event.isPrimary||event.button!==0)return;
@@ -167,14 +172,31 @@ function dragStory(event,grip,row,id){
 function render(){
  const s=story();s.lastScene=scene().id;$('currentStory').textContent=s.name;
  $('scenes').replaceChildren(...s.scenes.map((v,i)=>{
-  const b=document.createElement('button');b.textContent=v.title||'Scene '+(i+1);
-  if(v===scene())b.className='selected';
-  b.onclick=()=>{data.scene=v.id;closePanels();render();save();ed.focus()};return b;
+  const label=v.title||'Scene '+(i+1),row=document.createElement('div'),b=document.createElement('button');
+  row.className='sceneRow';b.className=v===scene()?'sceneOpen selected':'sceneOpen';b.textContent=label;
+  b.onclick=()=>{data.scene=v.id;closePanels();render();save();ed.focus()};row.append(b);
+  appendOptions(row,label,
+   ()=>dialog('Rename scene','','Save title',v.title||label,name=>editScene(s,v,name)),
+   ()=>{const last=s.scenes.length===1?' A blank scene will take its place.':'';
+    dialog('Delete scene?','Permanently delete “'+label+'” and its text?'+last,'Delete scene',null,()=>editScene(s,v,null));$('close').focus()}
+  );
+  return row;
  }));
  ed.innerHTML=scene().html;count();updateTools();
 }
 $('homeBtn').onclick=()=>{goHome();$('create').focus()};
-$('rename').onclick=()=>{closePanels();dialog('Rename scene','','Save',scene().title,name=>{scene().title=name;render();save();ed.focus()})};
+function editScene(s,target,title){
+ const index=s.scenes.indexOf(target);
+ if(index<0||story()!==s)return;
+ const scenes=s.scenes.slice();
+ if(title===null)scenes.splice(index,1);else scenes[index]={...target,title};
+ if(!scenes.length)scenes.push(freshScene());
+ const active=scenes.find(v=>v.id===scene().id)||scenes[Math.min(index,scenes.length-1)];
+ const old=data;
+ data={...data,scene:active.id,stories:data.stories.map(v=>v===s?{...s,scenes,lastScene:active.id}:v)};
+ if(!save()){data=old;return}
+ render();$('drawer').showPopover();
+}
 ed.oninput=()=>{scene().html=ed.innerHTML;count();save()};
 function dialog(title,detail,label,initial,action){$('heading').textContent=title;$('detail').textContent=detail;$('extra').replaceChildren();$('field').hidden=initial===null;$('field').placeholder='';$('field').value=initial||'';$('field').required=initial!==null;$('submit').textContent=label;$('submit').hidden=!action;$('form').onsubmit=e=>{e.preventDefault();if(action){const value=$('field').value.trim();if(initial!==null&&!value)return;modal.close();action(value)}};modal.showModal();if(initial!==null){$('field').focus();$('field').select()}}
 $('close').onclick=()=>modal.close();$('create').onclick=()=>dialog('Create story','Give this story a working title.','Create','',name=>{const s=freshStory(name);data.stories.push(s);openRoom(s)});$('addScene').onclick=()=>dialog('New scene','Each scene gets its own writing space.','Add scene','Scene '+(story().scenes.length+1),name=>{const s=freshScene(name);story().scenes.push(s);data.scene=s.id;closePanels();render();save();ed.focus()});
