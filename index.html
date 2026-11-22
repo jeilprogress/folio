@@ -96,11 +96,30 @@ const sizeChoice=$('writingSize');
 try{sizeChoice.value=localStorage.getItem('folio.writingSize')||'20'}catch{}
 function applySize(){if(!sizeChoice.value)sizeChoice.value='20';ed.style.setProperty('--writing-size',sizeChoice.value+'px')}
 applySize();sizeChoice.onchange=()=>{applySize();try{localStorage.setItem('folio.writingSize',sizeChoice.value)}catch{}};
-for(const [label,cmd] of [['left','justifyLeft'],['center','justifyCenter'],['right','justifyRight'],['justify','justifyFull']]){const b=document.createElement('button');b.dataset.cmd=cmd;b.title=b.ariaLabel='Align '+label;b.innerHTML='<span class="align '+label+'"><i></i><i></i><i></i><i></i></span>';$('alignTools').append(b)}
+const alignments=[
+ ['left','justifyLeft','L'],['center','justifyCenter','E'],
+ ['right','justifyRight','R'],['justify','justifyFull','J']
+];
+for(const [label,cmd,key] of alignments){
+ const b=document.createElement('button');
+ b.dataset.cmd=cmd;
+ b.title=b.ariaLabel=(label==='justify'?'Justify':'Align '+label)+' (Ctrl/⌘+Shift+'+key+')';
+ b.setAttribute('aria-keyshortcuts','Control+Shift+'+key+' Meta+Shift+'+key);
+ b.innerHTML='<span class="align '+label+'"><i></i><i></i><i></i><i></i></span>';
+ $('alignTools').append(b);
+}
+function applyFormat(cmd){ed.focus();document.execCommand(cmd);updateTools()}
+ed.addEventListener('keydown',event=>{
+ if(event.defaultPrevented||event.isComposing||event.altKey||!event.shiftKey||event.ctrlKey===event.metaKey)return;
+ const alignment=alignments.find(([, ,key])=>key===event.key.toUpperCase());
+ if(!alignment)return;
+ event.preventDefault();
+ applyFormat(alignment[1]);
+});
 function updateTools(){for(const b of document.querySelectorAll('[data-cmd]'))b.setAttribute('aria-pressed',String(ed.contains(getSelection()?.anchorNode)&&document.queryCommandState(b.dataset.cmd)))}
 $('formatToggle').onmousedown=e=>e.preventDefault();
 document.addEventListener('selectionchange',updateTools);$('tools').onmousedown=e=>{if(e.target.closest('button'))e.preventDefault()};
-$('tools').onclick=e=>{const cmd=e.target.closest('[data-cmd]')?.dataset.cmd;if(cmd){ed.focus();document.execCommand(cmd);updateTools()}};
+$('tools').onclick=e=>{const cmd=e.target.closest('[data-cmd]')?.dataset.cmd;if(cmd)applyFormat(cmd)};
 $('breakBtn').onclick=()=>{ed.focus();document.execCommand('insertHTML',false,'<p style="text-align:center">⁂</p><p><br></p>')};
 ed.addEventListener('beforeinput',e=>{if(e.inputType!=='insertText'||e.isComposing||!["'",'"'].includes(e.data))return;const sel=getSelection();if(!sel.rangeCount)return;const r=sel.getRangeAt(0).cloneRange();const block=r.startContainer.parentElement?.closest('p,div,li,blockquote')||ed;r.setStart(block,0);const opening=!r.toString()||/[\s([{—]$/u.test(r.toString());e.preventDefault();document.execCommand('insertText',false,e.data==="'"?(opening?'‘':'’'):(opening?'“':'”'))});
 </script>
