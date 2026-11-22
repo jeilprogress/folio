@@ -37,7 +37,7 @@ header{background:transparent;border:0}.landing{max-width:900px;margin:clamp(48p
 #count{position:fixed;left:max(16px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom));z-index:3;border-radius:999px;padding:7px 13px;font:500 12px/1.4 system-ui;font-variant-numeric:tabular-nums;color:var(--ink);pointer-events:none}
 @media(max-width:420px){#miniPlayer{bottom:calc(max(16px,env(safe-area-inset-bottom)) + 38px);width:220px}.writer{padding-bottom:212px}}
 .sizeChoice{font-size:13px;padding:5px}
-.openStory{min-width:0;flex:1;text-align:left;padding:10px;border-radius:12px;overflow-wrap:anywhere}.storyGrip,.storyOptions{flex:none;min-width:38px;min-height:42px;color:var(--muted)}.storyGrip{touch-action:none;user-select:none;cursor:grab;font-size:20px}.storyGrip:active{cursor:grabbing}.storyTile.dragSource{opacity:.6}.dropBefore:before,.dropAfter:after{content:"";position:absolute;left:8px;right:8px;height:3px;border-radius:4px;background:var(--wine)}.dropBefore:before{top:-8px}.dropAfter:after{bottom:-8px}.storyActions{display:grid;gap:4px}.storyActions button{text-align:left}.danger{color:var(--wine)}
+.openStory{min-width:0;flex:1;text-align:left;padding:10px;border-radius:12px;overflow-wrap:anywhere}.storyGrip,.storyOptions{flex:none;min-width:38px;min-height:42px;color:var(--muted)}.storyGrip{touch-action:none;user-select:none;cursor:grab;font-size:20px}.storyGrip:active{cursor:grabbing}.storyTile.dragSource{opacity:.6}.dropBefore:before,.dropAfter:after{content:"";position:absolute;left:8px;right:8px;height:3px;border-radius:4px;background:var(--wine)}.dropBefore:before{top:-8px}.dropAfter:after{bottom:-8px}.storyActions{display:flex;flex-wrap:wrap;gap:6px}.storyActions button,.storyGrip{border:1px solid var(--line);border-radius:999px;background:var(--panel);padding:7px 13px;font-size:13px}.storyActions button:disabled{opacity:.45;cursor:default}.storyActions button:hover:enabled,.storyGrip:hover{background:var(--wash)}@media(max-width:700px){.storyTile{flex-wrap:wrap}.storyActions{flex-basis:100%;padding:0 0 4px}.openStory{flex-basis:50%}}.danger{color:var(--wine)}
 </style></head><body>
 <div id="home"><header><div class="brand"><span class="mark" aria-hidden="true"></span>Folio</div><div class="flex"><button id="backups" class="glass">Backups</button><button id="theme" class="glass" aria-label="Switch theme">☾</button></div></header>
 <main class="landing"><div class="row"><h1>Your stories</h1><button id="create" class="create">＋ Create story</button></div><div id="shelf" class="shelfList"></div></main></div>
@@ -86,26 +86,25 @@ function moveStory(id,to){
  if(from<0||to<0||to>=stories.length||from===to)return;
  stories.splice(to,0,stories.splice(from,1)[0]);shelfChange(stories);
 }
-function storyOptions(s){
- dialog(s.name,'','',null,null);
+function storyActions(s){
  const actions=document.createElement('div');actions.className='storyActions';
  const add=(label,fn,disabled=false)=>{
   const btn=document.createElement('button');btn.type='button';btn.textContent=label;btn.disabled=disabled;
-  btn.onclick=()=>{modal.close();fn()};actions.append(btn);return btn;
+  btn.onclick=fn;btn.setAttribute('aria-label',label+' · '+s.name);actions.append(btn);return btn;
  };
- add('Rename story',()=>dialog('Rename story','','Save title',s.name,name=>shelfChange(data.stories.map(v=>v.id===s.id?{...v,name}:v))));
+ add('Rename',()=>dialog('Rename story','','Save title',s.name,name=>shelfChange(data.stories.map(v=>v.id===s.id?{...v,name}:v))));
  const i=data.stories.indexOf(s);
  if(data.stories.length>1){
   add('Move up',()=>moveStory(s.id,i-1),i===0);
   add('Move down',()=>moveStory(s.id,i+1),i===data.stories.length-1);
  }
- add('Delete story…',()=>{dialog('Delete story?','This permanently deletes “'+s.name+'” and all its scenes from this browser.','Delete story',null,()=>shelfChange(data.stories.filter(v=>v.id!==s.id)));$('close').focus()}).className='danger';
- $('extra').append(actions);
+ add('Delete',()=>{dialog('Delete story?','This permanently deletes “'+s.name+'” and all its scenes from this browser.','Delete story',null,()=>shelfChange(data.stories.filter(v=>v.id!==s.id)));$('close').focus()}).className='danger';
+ return actions;
 }
 function storyRow(s){
- const row=document.createElement('div'),grip=document.createElement('button'),open=document.createElement('button'),menu=document.createElement('button');
+ const row=document.createElement('div'),grip=document.createElement('button'),open=document.createElement('button');
  row.className='storyTile';row.dataset.storyId=s.id;
- grip.className='storyGrip';grip.textContent='⠿';grip.hidden=data.stories.length<2;
+ grip.className='storyGrip';grip.textContent='⠿ Drag';grip.hidden=data.stories.length<2;
  grip.setAttribute('aria-label','Reorder '+s.name);grip.title='Drag to reorder, or use the arrow keys';
  grip.onkeydown=e=>{
   if(!['ArrowUp','ArrowDown'].includes(e.key))return;
@@ -116,8 +115,7 @@ function storyRow(s){
  const title=document.createElement('strong'),info=document.createElement('small');
  open.className='openStory';title.textContent=s.name;info.textContent=s.scenes.length+(s.scenes.length===1?' scene':' scenes');
  open.append(title,info);open.onclick=()=>openRoom(s);
- menu.className='storyOptions';menu.textContent='•••';menu.setAttribute('aria-label','Options for '+s.name);menu.onclick=()=>storyOptions(s);
- row.append(grip,open,menu);return row;
+ row.append(grip,open,storyActions(s));return row;
 }
 function dragStory(event,grip,row,id){
  if(!event.isPrimary||event.button!==0)return;
