@@ -103,17 +103,16 @@ const alignments=[
 for(const [label,cmd,key] of alignments){
  const b=document.createElement('button');
  b.dataset.cmd=cmd;
- b.title=b.ariaLabel=(label==='justify'?'Justify':'Align '+label)+ (label==='right'?' (Ctrl+Alt+R)':' (Ctrl/⌘+Shift+'+key+')');
- b.setAttribute('aria-keyshortcuts',label==='right'?'Control+Alt+R':'Control+Shift+'+key+' Meta+Shift+'+key);
+ b.title=b.ariaLabel=(label==='justify'?'Justify':'Align '+label)+ ' (Ctrl+Alt+'+key+')';
+ b.setAttribute('aria-keyshortcuts','Control+Alt+'+key);
  b.innerHTML='<span class="align '+label+'"><i></i><i></i><i></i><i></i></span>';
  $('alignTools').append(b);
 }
 function applyFormat(cmd){ed.focus();document.execCommand(cmd);updateTools()}
 ed.addEventListener('keydown',event=>{
  if(event.defaultPrevented||event.isComposing||event.getModifierState?.('AltGraph'))return;
- const rightChord=event.ctrlKey&&event.altKey&&!event.metaKey&&!event.shiftKey;
- const otherChord=event.shiftKey&&!event.altKey&&event.ctrlKey!==event.metaKey;
- const alignment=alignments.find(([label,,key])=>label==='right'?rightChord&&(event.code==='KeyR'||event.key.toUpperCase()==='R'):otherChord&&key===event.key.toUpperCase());
+ if(!event.ctrlKey||!event.altKey||event.metaKey||event.shiftKey)return;
+ const alignment=alignments.find(([, ,key])=>event.key.toUpperCase()===key||event.code==='Key'+key);
  if(!alignment)return;
  event.preventDefault();
  applyFormat(alignment[1]);
@@ -214,8 +213,27 @@ $('backups').onclick=()=>{dialog('Story backups','Drafts live in this browser. D
 goHome();$('saved').textContent=readError?'Storage unavailable · use Backups':'● Saved on this device';
 </script><script>
 const redirect=location.origin+location.pathname, api='https://api.spotify.com/v1/me/player/currently-playing', tokenURL='https://accounts.spotify.com/api/token', sessionKey='folio.spotify:'+location.pathname;
-let session={};try{session=JSON.parse(sessionStorage.getItem(sessionKey)||'{}')}catch{}
-function persist(){sessionStorage.setItem(sessionKey,JSON.stringify(session))}
+const spotifyClientId='747e16d548b74979bd4c50bc0996229e';
+function readConnection(storage){
+ try{return JSON.parse(storage.getItem(sessionKey))||{}}catch{return {}}
+}
+let session={};
+try{
+ const tab=readConnection(sessionStorage),remembered=readConnection(localStorage);
+ session=tab.state?tab:(remembered.refresh?remembered:tab);
+ if(session.refresh)persist();
+}catch{}
+function persist(){
+ if(session.access&&session.refresh){
+  try{localStorage.setItem(sessionKey,JSON.stringify(session));sessionStorage.removeItem(sessionKey);return}catch{}
+ }
+ if(!session.access&&!session.state){
+  try{localStorage.removeItem(sessionKey)}catch{}
+  try{sessionStorage.removeItem(sessionKey)}catch{}
+  return;
+ }
+ sessionStorage.setItem(sessionKey,JSON.stringify(session));
+}
 let playback={playing:false,start:0,total:0,at:0},commandPending=false;
 function stamp(ms){const seconds=Math.floor(Math.max(0,ms)/1000);return Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0')}
 function tick(){
@@ -235,8 +253,18 @@ const cover=$('cover');if(art){if(cover.getAttribute('src')!==art){cover.hidden=
 const enc=bytes=>btoa(String.fromCharCode(...bytes)).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
 $('spotify').onclick=()=>{if(session.access){session={};persist();clearTimeout(pollTimer);music('Quiet room','Spotify is disconnected');return}
  if(location.protocol!=='https:'&&location.hostname!=='127.0.0.1'){dialog('Connect Spotify','Open Folio on its HTTPS GitHub Pages address to connect.','',null,null);return}
- dialog('Connect Spotify','In your Spotify developer dashboard, create a Web API app and register the exact redirect address below. Enter its public Client ID here. Development-mode app owners need Spotify Premium.','Connect','',async id=>{try{if(!/^[a-f\d]{32}$/i.test(id)){notice('Enter the 32-character Client ID');return}const verifier=enc(crypto.getRandomValues(new Uint8Array(48))),state=uid(),challenge=enc(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier))));session={id,verifier,state};persist();location.assign('https://accounts.spotify.com/authorize?'+new URLSearchParams({client_id:id,response_type:'code',scope:'user-read-currently-playing user-modify-playback-state',redirect_uri:redirect,state,code_challenge_method:'S256',code_challenge:challenge}))}catch{notice('Spotify setup needs browser session storage')}});$('field').placeholder='Client ID';const p=document.createElement('p');p.textContent=redirect;const a=document.createElement('a');a.href='https://developer.spotify.com/dashboard';a.target='_blank';a.rel='noopener';a.textContent='Open Spotify dashboard ↗';$('extra').append(p,a)};
-async function token(params){const current=session;const response=await fetch(tokenURL,{method:'POST',body:new URLSearchParams({...params,client_id:current.id})});if(!response.ok)throw Error('authorization');const t=await response.json();if(session!==current)return;Object.assign(session,{scope:t.scope||current.scope,access:t.access_token,refresh:t.refresh_token||session.refresh,expires:Date.now()+t.expires_in*1000});delete session.verifier;delete session.state;persist()}
+ startAuthorization();
+};
+async function startAuthorization(){
+ try{
+  const verifier=enc(crypto.getRandomValues(new Uint8Array(48))),state=uid();
+  const challenge=enc(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier))));
+  session={id:spotifyClientId,verifier,state};persist();
+  const query=new URLSearchParams({client_id:spotifyClientId,response_type:'code',scope:'user-read-currently-playing user-modify-playback-state',redirect_uri:redirect,state,code_challenge_method:'S256',code_challenge:challenge});
+  location.assign('https://accounts.spotify.com/authorize?'+query);
+ }catch{notice('Spotify needs browser storage to connect')}
+}
+async function token(params){const current=session;const response=await fetch(tokenURL,{method:'POST',body:new URLSearchParams({...params,client_id:current.id})});if(!response.ok){const error=await response.json().catch(()=>({}));throw Error(error.error==='invalid_grant'||error.error==='invalid_client'?'authorization':'network')}const t=await response.json();if(session!==current)return;Object.assign(session,{scope:t.scope||current.scope,access:t.access_token,refresh:t.refresh_token||session.refresh,expires:Date.now()+t.expires_in*1000});delete session.verifier;delete session.state;persist()}
 let pollTimer=0;
 async function poll(){clearTimeout(pollTimer);if(!session.access||document.hidden)return;let delay=12000;const current=session;try{if(Date.now()>session.expires-30000)await token({grant_type:'refresh_token',refresh_token:session.refresh});if(session!==current)return;const r=await fetch(api,{headers:{Authorization:'Bearer '+session.access}});if(session!==current)return;
  if(r.status===204)music('Nothing playing','Start a track in Spotify');else if(r.status===429){delay=Math.max(30,Number(r.headers.get('Retry-After'))||30)*1000;music('Taking a moment','Spotify asked us to retry later')}else if(r.status===403){music('Access unavailable','Check Premium and app user access');return}else if(r.status===401)throw Error('authorization');else if(!r.ok)throw Error('network');else{const x=await r.json();if(session!==current)return;music(x.item?.name||'Nothing playing',x.item?.artists?.map(a=>a.name).join(', ')||'Spotify',!!(x.item&&x.is_playing),x.item?.external_urls?.spotify,x.item?.album?.images?.at(-1)?.url||x.item?.images?.at(-1)?.url,x.progress_ms,x.item?.duration_ms)}}catch(e){if(session!==current)return;if(e.message==='authorization'){session={};persist();music('Reconnect Spotify','Your authorization expired');return}music('Spotify unavailable','Trying again shortly');delay=30000}if(session===current)pollTimer=setTimeout(poll,delay)}
@@ -275,5 +303,10 @@ async function control(action){
  }catch{notice('Could not reach Spotify. Try reconnecting.')}finally{commandPending=false}
 }
 $('prevTrack').onclick=()=>control('previous');$('nextTrack').onclick=()=>control('next');$('playTrack').onclick=()=>control(playback.playing?'pause':'play');
+window.addEventListener('storage',event=>{
+ if(event.key!==sessionKey||session.state)return;
+ session=readConnection(localStorage);clearTimeout(pollTimer);
+ if(session.access)poll();else music('Spotify','Disconnected');
+});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(pollTimer);else poll()});initMusic();
 </script></body></html>
