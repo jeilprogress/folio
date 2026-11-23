@@ -1,0 +1,18 @@
+{
+  "name": "Folio · Writing Room",
+  "short_name": "Folio",
+  "description": "A personal writing room for stories and scenes.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f0e8",
+  "theme_color": "#f4f0e8",
+  "icons": [
+    {
+      "src": "./folio-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
